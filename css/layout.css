@@ -273,3 +273,10 @@ footer {
         display: block
     }
 }
+
+/* footer logo lebih sopan */
+.f-logo {
+    font-size: clamp(1.6rem, 4.5vw, 3rem);
+    -webkit-text-stroke: 1px rgba(240, 234, 216, .25);
+    white-space: normal
+}

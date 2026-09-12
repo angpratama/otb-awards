@@ -51,9 +51,9 @@ function renderMyNoms() {
     const countEl = document.getElementById('nomCount');
     if (countEl) countEl.textContent = state.myNoms.length;
     const list = document.getElementById('feedList'); if (!list) return;
-    const mine = [...state.myNoms].sort((a, b) => b.ts - a.ts);
-    list.innerHTML = mine.length ? mine.map(n => {
-        const ok = candsIn(n.cat).some(c => c.usn === n.candUsn); // muncul di kandidat resmi = disetujui
+    const mine = state.myNoms.map((n, i) => ({ n, i })).sort((a, b) => b.n.ts - a.n.ts);
+    list.innerHTML = mine.length ? mine.map(({ n, i }) => {
+        const ok = candsIn(n.cat).some(c => c.usn === n.candUsn);
         return `<article class="feed-item${ok ? '' : ' pend'}">
       <div class="fi-top">
         <span class="fi-cat">${esc(catById(n.cat)?.name || '?')}</span>
@@ -62,6 +62,7 @@ function renderMyNoms() {
       <h4>${esc(memberName(n.candUsn))} <span class="usn">@${esc(n.candUsn)}</span></h4>
       ${n.note ? `<p>${esc(n.note)}</p>` : ''}
       <span class="fi-by">Diusulkan oleh <b>@${esc(n.by)}</b></span>
+      <button type="button" class="nom-del" data-del="${i}" title="Hapus catatan ini">✕</button>
     </article>`;
     }).join('')
         : `<div class="feed-empty">Belum ada usulan darimu. Jadi yang pertama.</div>`;
@@ -80,6 +81,16 @@ function syncNomClosed() {
 }
 
 function initNominasi() {
+    document.getElementById('feedList').addEventListener('click', e => {   // ← baru
+        const b = e.target.closest('[data-del]'); if (!b) return;
+        const i = +b.dataset.del;
+        if (i >= 0 && i < state.myNoms.length) {
+            state.myNoms.splice(i, 1);
+            save(); renderMyNoms();
+            toast('Catatan dihapus', 'Cuma catatan lokal di perangkat ini — kotak panitia tidak terpengaruh.');
+        }
+    });
+
     renderChips(); renderCandOptions(); syncNomClosed();
     bindCatIndex();
     document.getElementById('fNote').addEventListener('input', e => e.target.closest('.field').classList.remove('bad'));

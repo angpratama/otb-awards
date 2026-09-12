@@ -15,6 +15,10 @@ const schedTxt = (s, e) => {
   const a = s ? 'mulai ' + fmtDT(s) : 'mulai: belum ditentukan';
   return `${a} — ${e ? 'selesai ' + fmtDT(e) : 'tanpa batas'}`;
 };
+const sealInfo = () => {
+  const n = Object.keys(PUB.revealed || {}).length;
+  return { n, total: PUB.categories.length };
+};
 
 function renderAdmin() {
   document.getElementById('gate').hidden = adminOk;
@@ -32,6 +36,7 @@ function renderTab() {
   if (aTab === 'beranda') {
     const voters = new Set();
     Object.values(BALLOT).forEach(m => Object.keys(m).forEach(u => voters.add(u)));
+    const seal = sealInfo();
     body.innerHTML = `
       <div class="kv-grid">
         <div class="kv"><b>${PUB.categories.length}</b><span>KATEGORI</span></div>
@@ -47,7 +52,7 @@ function renderTab() {
         <div class="arow"><div><b>Ruang Suara</b><p class="amuted">${schedTxt(PUB.voteStart, PUB.voteEnd)}</p></div>
           ${phaseBadge(PUB.voteStart, PUB.voteEnd)}</div>
         <div class="arow"><div><b>Malam Penganugerahan</b><p class="amuted">${PUB.ceremonyAt ? fmtDT(PUB.ceremonyAt) : 'Belum diatur'}</p></div>
-          <span class="badge ${PUB.revealed ? 'badge-ok' : 'badge-pend'}">${PUB.revealed ? 'OPEN' : 'SEALED'}</span></div>
+          <span class="badge ${seal.n ? 'badge-ok' : 'badge-pend'}">${seal.n}/${seal.total} DIBUKA</span></div>
       </div>
       <div class="apanel">
         <div class="apanel-head"><div><h3>Pintasan</h3></div></div>
@@ -133,7 +138,7 @@ function renderTab() {
     return;
   }
 
-  /* ---------- KONTROL: jadwal + segel ---------- */
+  /* ---------- KONTROL: jadwal + segel per kategori ---------- */
   body.innerHTML = `
     <div class="apanel">
       <div class="apanel-head"><div><h3>Jadwal Tahapan</h3>
@@ -174,7 +179,7 @@ function renderTab() {
       <div class="arow" style="align-items:flex-start;gap:20px">
         <div style="flex:1;min-width:240px">
           <b>Malam Penganugerahan</b>
-          <p class="amuted">Dipakai hitung mundur di beranda anggota. Segel tetap dibuka manual dari tombol di bawah.</p>
+          <p class="amuted">Dipakai hitung mundur di beranda anggota. Segel tetap dibuka manual dari panel di bawah.</p>
           <div class="field" style="margin-top:10px;margin-bottom:8px;max-width:280px"><label class="flabel">Tanggal & Jam</label><input type="datetime-local" id="ceremonyAt" value="${ts2input(PUB.ceremonyAt)}"></div>
         </div>
       </div>
@@ -185,9 +190,21 @@ function renderTab() {
     </div>
     <div class="apanel">
       <div class="apanel-head"><div><h3>Segel Pemenang</h3>
-        <p class="amuted">Buka segel = hitung semua suara & umumkan pemenang ke papan publik.</p></div></div>
-      <div class="btnrow">
-        <button type="button" class="btn btn-gold sm" data-act="reveal">${PUB.revealed ? 'Segel Ulang' : 'Buka Segel Semua'}</button>
+        <p class="amuted">Buka satu-satu biar dramatis — atau semua sekaligus di malam H.</p></div></div>
+      ${PUB.categories.map(c => {
+    const isRev = !!(PUB.revealed && PUB.revealed[c.id]);
+    const w = isRev ? (PUB.winners || {})[c.id] : null;
+    return `<div class="arow">
+          <div><b>${esc(c.name)}</b>
+            <p class="amuted">${isRev && w ? 'Pemenang: ' + esc(memberName(w.usn)) + ' (' + w.votes + ' suara)' : 'Masih tersegel'}</p></div>
+          <div class="arow-acts">
+            <span class="badge ${isRev ? 'badge-ok' : 'badge-pend'}">${isRev ? 'DIBUKA' : 'TERSEGEL'}</span>
+            <button type="button" class="btn ${isRev ? 'btn-danger' : 'btn-gold'} sm" data-act="${isRev ? 'resealCat' : 'revealCat'}" data-id="${c.id}">${isRev ? 'Segel Ulang' : 'Buka Segel'}</button>
+          </div></div>`;
+  }).join('') || `<div class="feed-empty">Belum ada kategori.</div>`}
+      <div class="btnrow" style="margin-top:16px">
+        <button type="button" class="btn btn-gold sm" data-act="revealAll">Buka Semua</button>
+        <button type="button" class="btn btn-danger sm" data-act="resealAll">Segel Ulang Semua</button>
         <button type="button" class="btn btn-danger sm" data-act="resetVotes">Reset Semua Suara</button>
       </div>
     </div>`;
@@ -265,7 +282,7 @@ function initAdminPage() {
         toast('Kategori dihapus', 'Pialanya dipensiunkan dengan hormat.');
       }
     }
-    else if (act === 'approve') { Cloud.approveNom(id); toast('Usulan disetujui ✦', 'Kandidat resmi muncul di ruang suara anggota.'); }
+    else if (act === 'approve') { Cloud.approveNom(id); }
     else if (act === 'reject') { Cloud.rejectNom(id); toast('Usulan ditolak', 'Semoga ada hikmahnya.'); }
     else if (act === 'delCand') {
       const cat = el.dataset.cat;
@@ -278,18 +295,19 @@ function initAdminPage() {
       Cloud.setPub({ nomStart: g('nomStart'), nomEnd: g('nomEnd'), voteStart: g('voteStart'), voteEnd: g('voteEnd'), ceremonyAt: g('ceremonyAt') });
       toast('Jadwal tersimpan ✦', 'Semua perangkat langsung mengikuti jadwal baru.');
     }
-    else if (act === 'nomNow-open') { Cloud.setPub({ nomStart: Date.now(), nomEnd: PUB.nomEnd || Date.now() + 7 * 864e5 }); toast('Meja nominasi dibuka sekarang', 'Atur ulang jadwalnya kalau perlu.'); }
+    else if (act === 'nomNow-open') { Cloud.setPub({ nomStart: Date.now(), nomEnd: (PUB.nomEnd && PUB.nomEnd > Date.now()) ? PUB.nomEnd : Date.now() + 7 * 864e5 }); toast('Meja nominasi dibuka sekarang', 'Selesai otomatis diisi 7 hari ke depan.'); }
     else if (act === 'nomNow-close') { Cloud.setPub({ nomEnd: Date.now() }); toast('Meja nominasi ditutup', 'Bisa dibuka lagi kapan saja.'); }
-    else if (act === 'voteNow-open') { Cloud.setPub({ voteStart: Date.now(), voteEnd: PUB.voteEnd || Date.now() + 7 * 864e5 }); toast('Ruang suara dibuka sekarang', 'Anggota langsung bisa memilih.'); }
+    else if (act === 'voteNow-open') { Cloud.setPub({ voteStart: Date.now(), voteEnd: (PUB.voteEnd && PUB.voteEnd > Date.now()) ? PUB.voteEnd : Date.now() + 7 * 864e5 }); toast('Ruang suara dibuka sekarang', 'Anggota langsung bisa memilih.'); }
     else if (act === 'voteNow-close') { Cloud.setPub({ voteEnd: Date.now() }); toast('Ruang suara ditutup', 'Suara tidak bisa diubah lagi.'); }
-    else if (act === 'reveal') {
-      if (PUB.revealed) { Cloud.reseal(); toast('Segel dipasang kembali', 'Halaman pemenang anggota terkunci lagi.'); }
-      else {
-        if (confirm('Buka segel & umumkan semua pemenang sekarang?')) {
-          Cloud.reveal(); Confetti.burst(180);
-          toast('Segel dibuka ✦', 'Pemenang sudah diumumkan ke semua anggota.');
-        }
-      }
+    else if (act === 'revealCat') { Cloud.revealCat(id); }
+    else if (act === 'resealCat') {
+      if (confirm('Segel ulang kategori ini? Pemenangnya menghilang lagi dari halaman anggota.')) Cloud.resealCat(id);
+    }
+    else if (act === 'revealAll') {
+      if (confirm('Buka segel SEMUA kategori sekarang?')) { Cloud.revealAll(); Confetti.burst(180); toast('Semua segel dibuka ✦', 'Selamat kepada para pemenang!'); }
+    }
+    else if (act === 'resealAll') {
+      if (confirm('Segel ulang SEMUA kategori?')) Cloud.resealAll();
     }
     else if (act === 'resetVotes') {
       if (confirm('Reset semua suara? Tindakan ini tidak bisa dibatalkan.')) {
