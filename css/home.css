@@ -591,3 +591,573 @@
         font-size: 1.2rem
     }
 }
+
+/* ===== INTRO PEMBUKA (lampu sorot) ===== */
+#intro {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: opacity .9s ease, visibility .9s;
+    cursor: pointer
+}
+
+#intro.done {
+    opacity: 0;
+    visibility: hidden
+}
+
+.intro-beams {
+    position: absolute;
+    inset: 0;
+    pointer-events: none
+}
+
+.intro-beams i {
+    position: absolute;
+    top: -25%;
+    width: 42vw;
+    min-width: 200px;
+    height: 160%;
+    transform-origin: top center;
+    background: linear-gradient(to bottom, rgba(228, 190, 92, .14), transparent 68%);
+    filter: blur(7px);
+    animation: sway 4.5s ease-in-out infinite alternate
+}
+
+.intro-beams i:nth-child(1) {
+    left: 16%;
+    transform: rotate(-22deg)
+}
+
+.intro-beams i:nth-child(2) {
+    left: 50%;
+    margin-left: -21vw;
+    min-width: 200px;
+    width: 42vw
+}
+
+.intro-beams i:nth-child(3) {
+    right: 16%;
+    transform: rotate(22deg);
+    animation-delay: 1.1s
+}
+
+.intro-beams i:nth-child(2) {
+    animation-delay: .5s
+}
+
+@keyframes sway {
+    from {
+        opacity: .4
+    }
+
+    to {
+        opacity: 1
+    }
+}
+
+.intro-center {
+    text-align: center;
+    padding: 0 24px;
+    animation: introUp 1.1s cubic-bezier(.2, .8, .3, 1) both;
+    position: relative
+}
+
+.intro-kicker {
+    font: 600 10px var(--font-b);
+    letter-spacing: .4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    animation: fadeIn 1s .3s both
+}
+
+.intro-title {
+    font: 900 clamp(4rem, 21vw, 10rem)/0.9 var(--font-d);
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 16px 0 12px;
+    text-shadow: 0 0 70px rgba(228, 190, 92, .45);
+    animation: glow 2.4s ease-in-out infinite alternate
+}
+
+.intro-title span {
+    display: block;
+    color: transparent;
+    -webkit-text-stroke: 2px var(--gold);
+    font-style: italic;
+    text-shadow: none
+}
+
+@keyframes glow {
+    from {
+        text-shadow: 0 0 40px rgba(228, 190, 92, .25)
+    }
+
+    to {
+        text-shadow: 0 0 90px rgba(228, 190, 92, .55)
+    }
+}
+
+.intro-sub {
+    font: italic 500 clamp(14px, 4vw, 17px) var(--font-d);
+    color: var(--cream-dim);
+    animation: fadeIn 1s .6s both
+}
+
+.intro-hint {
+    margin-top: 34px;
+    font: 600 9px var(--font-b);
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    color: var(--cream-faint);
+    animation: fadeIn 1s 1.2s both
+}
+
+@keyframes introUp {
+    from {
+        opacity: 0;
+        transform: translateY(34px) scale(.95)
+    }
+
+    to {
+        opacity: 1;
+        transform: none
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0
+    }
+
+    to {
+        opacity: 1
+    }
+}
+
+/* ===== HERO MOBILE SANTAI (gak dipaksa full-screen) ===== */
+@media (max-width:760px) {
+    .hero {
+        min-height: auto;
+        padding-top: calc(64px + env(safe-area-inset-top, 0px));
+        padding-bottom: 20px
+    }
+
+    .hero-inner {
+        justify-content: flex-start;
+        gap: 18px;
+        padding-bottom: 0
+    }
+
+    .hero-kicker {
+        font-size: 8.5px;
+        letter-spacing: .2em;
+        gap: 8px;
+        line-height: 1.7
+    }
+
+    .k-line {
+        width: 18px;
+        flex: none
+    }
+
+    .t-main {
+        font: 900 clamp(3rem, 17vw, 7rem)/0.92 var(--font-d)
+    }
+
+    .t-star {
+        display: none
+    }
+
+    .hero-meta {
+        gap: 16px;
+        padding-top: 16px
+    }
+
+    .hero-desc p {
+        font-size: 13.5px;
+        line-height: 1.65;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden
+    }
+
+    .hero-cta {
+        margin-top: 12px;
+        gap: 10px
+    }
+
+    .hero-cta .btn {
+        flex: 1;
+        padding: 13px 12px;
+        font-size: 10.5px;
+        white-space: nowrap
+    }
+
+    .countdown {
+        width: 100%
+    }
+
+    .cd-unit {
+        padding: 0 clamp(10px, 3vw, 18px)
+    }
+
+    .cd-unit b {
+        font-size: clamp(1.7rem, 7.5vw, 2.6rem)
+    }
+
+    .cd-unit span {
+        font-size: 8px;
+        letter-spacing: .18em
+    }
+}
+
+/* ===== BERANDA MOBILE — ritme & kerapian ===== */
+@media (max-width:760px) {
+
+    /* marquee lebih ringkas */
+    .marquee {
+        padding: 10px 0
+    }
+
+    .mq-g {
+        font-size: 10.5px;
+        letter-spacing: .18em
+    }
+
+    .mq-g .mq-s {
+        margin: 0 14px;
+        font-size: 9px
+    }
+
+    /* manifesto: napas lebih pendek */
+    .manifesto {
+        padding: 52px 0 20px
+    }
+
+    .man-grid {
+        gap: 26px
+    }
+
+    .man-grid h2 {
+        font-size: clamp(1.5rem, 6.4vw, 2.2rem)
+    }
+
+    .man-right p {
+        font-size: 13.5px;
+        line-height: 1.7
+    }
+
+    .man-right .sig {
+        font-size: 16px;
+        margin-top: 16px
+    }
+
+    /* statistik: 3 kolom kompak (bukan numpuk ke bawah) */
+    .stats {
+        padding: 10px 0
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        border: 1px solid var(--line)
+    }
+
+    .stat {
+        border-left: 1px solid var(--line);
+        border-top: 0;
+        padding: 18px 8px;
+        text-align: center
+    }
+
+    .stat:first-child {
+        border-left: 0
+    }
+
+    .stat b {
+        font-size: clamp(1.5rem, 7vw, 2.4rem)
+    }
+
+    .stat span {
+        font-size: 8px;
+        letter-spacing: .14em;
+        margin-top: 6px
+    }
+
+    /* daftar kategori: lebih ringkas & enak ditap */
+    .catlist {
+        padding: 44px 0 66px
+    }
+
+    .sec-head {
+        margin-bottom: 20px
+    }
+
+    .sec-head h2 {
+        font-size: clamp(1.7rem, 7vw, 2.6rem)
+    }
+
+    .sec-note {
+        font-size: 13px;
+        margin-top: 8px
+    }
+
+    .cat-row {
+        grid-template-columns: 34px 1fr;
+        gap: 12px;
+        padding: 20px 6px
+    }
+
+    .cat-row .num {
+        font-size: .95rem
+    }
+
+    .cat-row h3 {
+        font-size: clamp(1.3rem, 5.6vw, 1.9rem)
+    }
+
+    .cat-row .cr-tag {
+        font-size: 12.5px;
+        margin-top: 5px
+    }
+
+    .cat-row .go {
+        font-size: 9px;
+        margin-top: 8px
+    }
+
+    /* ajakan penutup */
+    .cta-band {
+        padding: 52px 0
+    }
+
+    .cta-band h2 {
+        font-size: clamp(1.7rem, 7vw, 2.6rem)
+    }
+
+    .cta-band p {
+        font-size: 13.5px;
+        margin: 12px auto 22px
+    }
+
+    .cta-band .hero-cta .btn {
+        flex: 1
+    }
+}
+
+/* ===== BERANDA MOBILE — mengalir, bernapas, tanpa ruang kosong canggung ===== */
+@media (max-width:760px) {
+
+    /* HERO: tetap layar pertama yang keren, isi di tengah, TANPA sisa ruang aneh */
+    .hero {
+        min-height: calc(100svh - 56px);
+        display: flex;
+        flex-direction: column;
+        padding-top: calc(64px + env(safe-area-inset-top, 0px));
+        padding-bottom: 18px
+    }
+
+    .hero-inner {
+        flex: 1;
+        justify-content: center;
+        gap: 16px;
+        padding-bottom: 0
+    }
+
+    .hero-kicker {
+        font-size: 8.5px;
+        letter-spacing: .2em;
+        gap: 8px;
+        line-height: 1.7
+    }
+
+    .k-line {
+        width: 16px;
+        flex: none
+    }
+
+    .t-main {
+        font: 900 clamp(3rem, 17vw, 7rem)/0.92 var(--font-d)
+    }
+
+    .t-star {
+        display: none
+    }
+
+    .hero-meta {
+        gap: 14px;
+        padding-top: 14px
+    }
+
+    .hero-desc p {
+        font-size: 13.5px;
+        line-height: 1.6
+    }
+
+    .hero-cta {
+        margin-top: 12px;
+        gap: 10px
+    }
+
+    .hero-cta .btn {
+        flex: 1;
+        padding: 13px 12px;
+        font-size: 10.5px;
+        white-space: nowrap
+    }
+
+    .countdown {
+        width: 100%
+    }
+
+    .cd-unit {
+        padding: 0 clamp(10px, 3vw, 18px)
+    }
+
+    .cd-unit b {
+        font-size: clamp(1.7rem, 7.5vw, 2.6rem)
+    }
+
+    .cd-unit span {
+        font-size: 8px;
+        letter-spacing: .18em
+    }
+
+    .marquee {
+        padding: 10px 0
+    }
+
+    .mq-g {
+        font-size: 10.5px;
+        letter-spacing: .18em
+    }
+
+    .mq-g .mq-s {
+        margin: 0 14px;
+        font-size: 9px
+    }
+
+    /* MANIFESTO: proporsional, teks nyaman dibaca */
+    .manifesto {
+        padding: 56px 0 26px
+    }
+
+    .man-grid {
+        gap: 24px
+    }
+
+    .man-grid h2 {
+        font-size: clamp(1.55rem, 6.8vw, 2.3rem);
+        line-height: 1.25
+    }
+
+    .man-right p {
+        font-size: 14px;
+        line-height: 1.75
+    }
+
+    /* STATISTIK: strip 3 kolom kompak */
+    .stats {
+        padding: 8px 0
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        border: 1px solid var(--line)
+    }
+
+    .stat {
+        border-left: 1px solid var(--line);
+        border-top: 0;
+        padding: 18px 8px;
+        text-align: center
+    }
+
+    .stat:first-child {
+        border-left: 0
+    }
+
+    .stat b {
+        font-size: clamp(1.5rem, 7vw, 2.4rem)
+    }
+
+    .stat span {
+        font-size: 8px;
+        letter-spacing: .14em;
+        margin-top: 6px
+    }
+
+    /* KATEGORI: napas cukup, baris enak ditap */
+    .catlist {
+        padding: 52px 0 64px
+    }
+
+    .sec-head {
+        margin-bottom: 18px
+    }
+
+    .sec-head h2 {
+        font-size: clamp(1.75rem, 7.5vw, 2.7rem)
+    }
+
+    .sec-note {
+        font-size: 13px;
+        margin-top: 8px
+    }
+
+    .cat-row {
+        grid-template-columns: 34px 1fr;
+        gap: 12px;
+        padding: 22px 6px
+    }
+
+    .cat-row .num {
+        font-size: .95rem
+    }
+
+    .cat-row h3 {
+        font-size: clamp(1.35rem, 5.8vw, 2rem)
+    }
+
+    .cat-row .cr-tag {
+        font-size: 12.5px;
+        margin-top: 5px
+    }
+
+    .cat-row .go {
+        display: none
+    }
+
+    /* di HP tak perlu "lihat kandidat", seluruh baris sudah bisa ditap */
+
+    /* CTA: penutup yang nggak bertele-tele */
+    .cta-band {
+        padding: 56px 0
+    }
+
+    .cta-band h2 {
+        font-size: clamp(1.8rem, 7.5vw, 2.8rem)
+    }
+
+    .cta-band p {
+        font-size: 14px;
+        margin: 12px auto 22px
+    }
+
+    .cta-band .hero-cta .btn {
+        flex: 1
+    }
+
+    /* FOOTER: logo kecil sopan */
+    .f-logo {
+        font-size: clamp(1.8rem, 6vw, 2.6rem)
+    }
+}

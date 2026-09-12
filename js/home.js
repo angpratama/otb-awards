@@ -12,19 +12,26 @@ function initCountdown() {
     let done = false;
     const tick = () => {
         if (done) return;
-        let d = Math.max(0, target - Date.now());
+        const d = Math.max(0, target - Date.now());
         if (d === 0) {
             done = true;
-            el.innerHTML = '<div class="cd-unit" style="border-left:0"><b>✦</b><span>MALAM PENGANUGERAHAN TELAH TIBA</span></div>';
+            el.innerHTML = '<div class="cd-unit" style="border-left:0;padding-left:0"><b>✦</b><span>MALAM PENGANUGERAHAN TELAH TIBA</span></div>';
             return;
         }
-        u.forEach((x, i) => bs[i].textContent = String(Math.floor(d / x[1])).padStart(2, '0'));
+        const v = [
+            Math.floor(d / 864e5),
+            Math.floor(d / 36e5) % 24,
+            Math.floor(d / 6e4) % 60,
+            Math.floor(d / 1e3) % 60
+        ];
+        v.forEach((n, i) => bs[i].textContent = String(n).padStart(2, '0'));
     };
     tick(); setInterval(tick, 1000);
     const dt = new Date(target).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     $$('.ev-date').forEach(e => e.textContent = dt.toUpperCase());
     $('#fYear').textContent = new Date().getFullYear();
 }
+
 function renderStats(animate = true) {
     const vals = { stCat: PUB.categories.length, stCand: allCands().length, stV: ROSTER.length };
     for (const id in vals) {

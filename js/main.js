@@ -36,7 +36,21 @@ function renderAll() {
     renderVoteUI(); renderWinners(); syncNomClosed();
 }
 
+function initIntro() {
+    const intro = document.getElementById('intro'); if (!intro) return;
+    if (sessionStorage.getItem('ba_intro')) { intro.remove(); return; } // 1x per sesi saja
+    const finish = () => {
+        if (intro.classList.contains('done')) return;
+        intro.classList.add('done');
+        sessionStorage.setItem('ba_intro', '1');
+        setTimeout(() => intro.remove(), 1000);
+    };
+    intro.addEventListener('click', finish); // gak sabar? ketuk
+    setTimeout(finish, 3000);                // atau tunggu 3 detik
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    initIntro();
     initNav();
     initCountdown(); initHeroFx(); initFaq();
     initNominasi(); initVoting(); initPemenang();
