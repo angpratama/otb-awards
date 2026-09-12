@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PANEL PANITIA — BOYS AWARDS</title>
+    <meta name="robots" content="noindex">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Space+Grotesk:wght@300..700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/pages.css">
+</head>
+
+<body>
+    <div class="noise"></div>
+
+    <header>
+        <div class="container h-in">
+            <a class="logo" href="index.html">
+                <svg class="ic" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2l2.6 6 6.4.6-4.9 4.3 1.5 6.3L12 15.8 6.4 19.2l1.5-6.3L3 8.6 9.4 8 12 2z" />
+                </svg>
+                <b>BOYS AWARDS</b>
+                <span class="vol">PANITIA</span>
+            </a>
+            <a class="btn btn-ghost sm" href="index.html">← Situs Utama</a>
+        </div>
+    </header>
+
+    <main>
+        <section id="gate" class="admin-login">
+            <div class="login-card">
+                <p class="label">AREA TERBATAS — BA/00</p>
+                <h2>Panel <em>Panitia</em></h2>
+                <p>Satu-satunya tempat yang bisa membuka kotak usulan & kotak suara. Login pakai akun panitia.</p>
+                <form id="loginForm" novalidate>
+                    <div class="field">
+                        <label class="flabel" for="lEmail">Email Panitia</label>
+                        <input type="email" id="lEmail" placeholder="panitia@otb.com" autocomplete="off">
+                    </div>
+                    <div class="field">
+                        <label class="flabel" for="lPass">Kata Sandi</label>
+                        <input type="password" id="lPass" placeholder="••••••••" autocomplete="off">
+                        <p class="err">Email atau sandi salah. Tarik napas, coba lagi.</p>
+                    </div>
+                    <button type="submit" class="btn btn-gold" style="width:100%">Buka Panel</button>
+                </form>
+                <p class="hint">Akun panitia dibuat di Firebase Console → Authentication → Users.</p>
+            </div>
+        </section>
+
+        <section id="panel" class="container admin-wrap" hidden>
+            <div class="page-head" style="padding-left:0;padding-right:0">
+                <p class="label">RUANG SIDANG — BA/00</p>
+                <h1>Ruang <em>Panitia</em></h1>
+                <p class="page-sub">Kamu melihat apa yang tidak bisa dilihat anggota: isi kotak usulan, kotak suara, dan
+                    hitungan live.</p>
+            </div>
+            <div class="admin-tabsbar">
+                <div class="admin-tabs" id="aTabs"></div>
+                <button type="button" class="btn btn-ghost sm" id="aLogout">Keluar</button>
+            </div>
+            <div id="aBody"></div>
+        </section>
+    </main>
+
+    <div id="toasts" aria-live="polite"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/admin-page.js"></script>
+</body>
+
+</html>

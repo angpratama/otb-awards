@@ -1,0 +1,275 @@
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(11, 10, 8, .72);
+    border-bottom: 1px solid var(--line)
+}
+
+@supports (backdrop-filter:blur(14px)) {
+    header {
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px)
+    }
+}
+
+.h-in {
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 11px
+}
+
+.logo .ic {
+    color: var(--gold);
+    width: 19px;
+    height: 19px
+}
+
+.logo b {
+    font: 700 17px var(--font-d);
+    letter-spacing: .02em
+}
+
+.logo .vol {
+    font: 600 8.5px var(--font-b);
+    letter-spacing: .2em;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    border-radius: 999px;
+    padding: 3px 8px
+}
+
+.nav {
+    display: flex;
+    gap: 34px
+}
+
+.nav a {
+    font: 600 11.5px var(--font-b);
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--cream-dim);
+    position: relative;
+    transition: color .3s;
+    padding: 4px 0
+}
+
+.nav a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 0;
+    height: 1px;
+    background: var(--gold);
+    transition: width .35s
+}
+
+.nav a:hover {
+    color: var(--cream)
+}
+
+.nav a.on {
+    color: var(--gold)
+}
+
+.nav a.on::after {
+    width: 100%
+}
+
+.burger {
+    display: none;
+    width: 42px;
+    height: 42px;
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    cursor: pointer;
+    position: relative;
+    z-index: 110;
+    transition: border-color .3s
+}
+
+.burger span {
+    position: absolute;
+    left: 11px;
+    right: 11px;
+    height: 1.6px;
+    background: var(--cream);
+    transition: .35s
+}
+
+.burger span:nth-child(1) {
+    top: 16px
+}
+
+.burger span:nth-child(2) {
+    top: 23px
+}
+
+.burger.open span:nth-child(1) {
+    top: 19.5px;
+    transform: rotate(45deg)
+}
+
+.burger.open span:nth-child(2) {
+    top: 19.5px;
+    transform: rotate(-45deg)
+}
+
+.mnav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 95;
+    background: var(--ink);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 7vh;
+    padding: 0 9vw;
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path .6s cubic-bezier(.75, 0, .25, 1)
+}
+
+.mnav.open {
+    clip-path: inset(0 0 0 0)
+}
+
+.mnav-links {
+    display: flex;
+    flex-direction: column
+}
+
+.mnav-links a {
+    font: italic 600 clamp(2rem, 8.5vw, 3.6rem) var(--font-d);
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: baseline;
+    gap: 18px;
+    opacity: 0;
+    transform: translateY(28px);
+    transition: .55s;
+    transition-delay: calc(var(--i)*70ms)
+}
+
+.mnav.open .mnav-links a {
+    opacity: 1;
+    transform: none
+}
+
+.mnav-links a span {
+    font: 600 12px var(--font-b);
+    color: var(--gold);
+    letter-spacing: .2em
+}
+
+.mnav-meta {
+    font: 600 10px var(--font-b);
+    letter-spacing: .24em;
+    color: var(--cream-dim);
+    display: flex;
+    flex-direction: column;
+    gap: 8px
+}
+
+.mnav-meta .ev-date {
+    color: var(--gold)
+}
+
+main {
+    padding-top: 72px
+}
+
+.page {
+    display: none
+}
+
+.page.active {
+    display: block;
+    animation: pageIn .55s cubic-bezier(.2, .7, .3, 1)
+}
+
+@keyframes pageIn {
+    from {
+        opacity: 0;
+        transform: translateY(14px)
+    }
+}
+
+.page-head {
+    padding: clamp(60px, 9vw, 110px) clamp(20px, 4vw, 44px) clamp(24px, 3vw, 40px)
+}
+
+.page-sub {
+    color: var(--cream-dim);
+    max-width: 56ch;
+    font-size: 15.5px
+}
+
+footer {
+    border-top: 1px solid var(--line);
+    padding: clamp(56px, 8vw, 90px) 0 44px;
+    overflow: hidden
+}
+
+.f-logo {
+    font: 900 clamp(2.8rem, 10.5vw, 8rem)/0.95 var(--font-d);
+    letter-spacing: -.02em;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(240, 234, 216, .32);
+    text-transform: uppercase;
+    white-space: nowrap
+}
+
+.f-logo i {
+    font-style: normal;
+    -webkit-text-stroke: 0;
+    color: var(--gold)
+}
+
+.f-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 38px;
+    font-size: 12.5px;
+    color: var(--cream-dim)
+}
+
+.f-meta .links {
+    display: flex;
+    gap: 22px;
+    flex-wrap: wrap
+}
+
+.f-meta a {
+    transition: color .3s
+}
+
+.f-meta a:hover {
+    color: var(--gold)
+}
+
+@media (max-width:860px) {
+    .nav {
+        display: none
+    }
+
+    .burger {
+        display: block
+    }
+}
