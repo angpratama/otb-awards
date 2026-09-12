@@ -9,7 +9,17 @@ function initCountdown() {
     const u = [['HARI', 864e5], ['JAM', 36e5], ['MENIT', 6e4], ['DETIK', 1e3]];
     el.innerHTML = u.map(x => `<div class="cd-unit"><b>00</b><span>${x[0]}</span></div>`).join('');
     const bs = el.querySelectorAll('b');
-    const tick = () => { let d = Math.max(0, target - Date.now()); u.forEach((x, i) => bs[i].textContent = String(Math.floor(d / x[1])).padStart(2, '0')); };
+    let done = false;
+    const tick = () => {
+        if (done) return;
+        let d = Math.max(0, target - Date.now());
+        if (d === 0) {
+            done = true;
+            el.innerHTML = '<div class="cd-unit" style="border-left:0"><b>✦</b><span>MALAM PENGANUGERAHAN TELAH TIBA</span></div>';
+            return;
+        }
+        u.forEach((x, i) => bs[i].textContent = String(Math.floor(d / x[1])).padStart(2, '0'));
+    };
     tick(); setInterval(tick, 1000);
     const dt = new Date(target).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     $$('.ev-date').forEach(e => e.textContent = dt.toUpperCase());

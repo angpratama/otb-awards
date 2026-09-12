@@ -1,7 +1,7 @@
 /* =====================================================
    KONFIG — EDIT DI SINI
    ===================================================== */
-const EVENT_DATE_STR = '2026-02-14T19:00:00+07:00'; // tanggal malam penganugerahan
+const EVENT_DATE_STR = '2026-09-20T19:20:00+07:00'; // tanggal malam penganugerahan
 const LS_KEY = 'boysAwards_me_v3'; // data pribadi perangkat ini
 
 /* ====== ANGGOTA OTB — GANTI NAMA + USERNAME KALIAN ====== */
