@@ -1,5 +1,5 @@
 function initMarquee() {
-    const items = (PUB.categories.length ? PUB.categories : [{ name: 'SEGERA HADIR' }])
+    const items = (pubCats().length ? pubCats() : [{ name: 'SEGERA HADIR' }])
         .map(c => `<span>${esc(c.name.toUpperCase())}</span><span class="mq-s">✦</span>`).join('');
     document.getElementById('mqTrack').innerHTML = `<div class="mq-g">${items}</div><div class="mq-g" aria-hidden="true">${items}</div>`;
 }
@@ -31,9 +31,9 @@ function initCountdown() {
     $$('.ev-date').forEach(e => e.textContent = dt.toUpperCase());
     $('#fYear').textContent = new Date().getFullYear();
 }
-
 function renderStats(animate = true) {
-    const vals = { stCat: PUB.categories.length, stCand: allCands().length, stV: ROSTER.length };
+    const pubCands = pubCats().flatMap(c => candsIn(c.id)).length; // rahasia tidak dihitung
+    const vals = { stCat: pubCats().length, stCand: pubCands, stV: ROSTER.length };
     for (const id in vals) {
         const b = document.getElementById(id), to = vals[id];
         if (!animate) { b.textContent = to; b.dataset.t = to; continue; }
@@ -44,11 +44,11 @@ function renderStats(animate = true) {
 }
 function renderCatIndex() {
     const ol = document.getElementById('catIndex');
-    if (!PUB.categories.length) {
+    if (!pubCats().length) {
         ol.innerHTML = `<li class="empty">${ic('trophy')}<h3>Piala belum diumumkan.</h3><p>Panitia sedang menyusun kategori. Pantengin terus halaman ini.</p></li>`;
         return;
     }
-    ol.innerHTML = PUB.categories.map((c, i) => `
+    ol.innerHTML = pubCats().map((c, i) => `
     <li class="cat-row" data-go="${c.id}" role="button" tabindex="0">
       <span class="num">${String(i + 1).padStart(2, '0')}</span>
       <div><h3>${esc(c.name)}</h3><p class="cr-tag">${esc(c.desc)}</p></div>

@@ -30,12 +30,6 @@ function initNav() {
     });
     addEventListener('hashchange', route);
 }
-function renderAll() {
-    initMarquee(); renderCatIndex(); renderStats(); renderMyNoms();
-    renderChips(); renderCandOptions();
-    renderVoteUI(); renderWinners(); syncNomClosed();
-}
-
 function initIntro() {
     const intro = document.getElementById('intro'); if (!intro) return;
     if (sessionStorage.getItem('ba_intro')) { intro.remove(); return; } // 1x per sesi saja
@@ -48,20 +42,25 @@ function initIntro() {
     intro.addEventListener('click', finish); // gak sabar? ketuk
     setTimeout(finish, 3000);                // atau tunggu 3 detik
 }
+function renderAll() {
+    initMarquee(); renderCatIndex(); renderStats(); renderMyNoms();
+    renderChips(); renderCandOptions();
+    renderVoteUI(); renderWinners(); syncNomClosed();
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     initIntro();
     initNav();
+    route(); // tampilkan halaman DULU — sekalipun ada error di bawah, beranda tetap muncul
+
     initCountdown(); initHeroFx(); initFaq();
-    initNominasi(); initVoting(); initPemenang();
-    renderIdentityBars();
-    renderStats(false); renderMyNoms(); renderVoteUI(); renderWinners(); renderCatIndex();
+    try { initNominasi(); initVoting(); initPemenang(); } catch (e) { console.error(e); }
+    renderStats(false); renderCatIndex();
+    try { renderMyNoms(); renderVoteUI(); renderWinners(); } catch (e) { console.error(e); }
 
     if (typeof Cloud !== 'undefined') {
         Cloud.onChange(renderAll);
         Cloud.listenPub();
     }
-    route();
-
     setInterval(renderAll, 30000); // buka/tutup otomatis berganti sendiri di layar anggota
 });

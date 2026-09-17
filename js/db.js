@@ -18,7 +18,7 @@ if (CLOUD_READY) {
 }
 
 let PUB = {
-    categories: [], candidates: {},
+    categories: [], candidates: {}, secret: {},
     nomStart: null, nomEnd: null, voteStart: null, voteEnd: null, ceremonyAt: null,
     revealed: {}, winners: {}
 };
@@ -49,7 +49,7 @@ const Cloud = (() => {
             ? Object.fromEntries(cats.map(c => [c.id, true]))
             : (raw || {});
         return {
-            categories: cats, candidates: v?.candidates || {},
+            categories: cats, candidates: v?.candidates || {}, secret: v?.secret || {},
             nomStart: v?.nomStart || null, nomEnd: v?.nomEnd || null,
             voteStart: v?.voteStart || null, voteEnd: v?.voteEnd || null,
             ceremonyAt: v?.ceremonyAt || null,
@@ -79,7 +79,7 @@ const Cloud = (() => {
             const stale = v && !v.categories && v.data; /* sisa data versi lama? anggap kosong */
             if (!v || stale) {
                 if (firebase.auth().currentUser) {
-                    refs.pub.set({ categories: DEFAULT_CATEGORIES, candidates: {}, revealed: null, winners: {} })
+                    refs.pub.set({ categories: DEFAULT_CATEGORIES, candidates: {}, secret: {}, revealed: null, winners: {} })
                         .then(() => toast('Papan pengumuman disiapkan ✦', 'Kategori awal terpasang.'))
                         .catch(e => toast('Gagal menulis ke database', e.message));
                 }

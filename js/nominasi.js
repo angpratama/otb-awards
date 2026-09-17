@@ -1,33 +1,22 @@
-/* ====== IDENTITAS (1 akun = 1 anggota) ====== */
-function identityBarHTML() {
-    if (!ROSTER.length) return `<div class="idbar bad"><div class="idbar-l"><b>Daftar anggota kosong</b><p>Isi ROSTER di js/data.js dulu ya.</p></div></div>`;
-    return `<div class="idbar${state.myUsn ? ' ok' : ''}">
-    <div class="idbar-l"><b>${state.myUsn ? 'Kamu terdaftar sebagai' : 'Kamu siapa?'}</b>
-    <p>Satu akun = satu anggota = satu usulan & satu suara per kategori.</p></div>
-    <select class="idbar-sel" data-idbar aria-label="Pilih identitas">
-      <option value="">— pilih namamu —</option>
-      ${ROSTER.map(m => `<option value="${esc(m.usn)}"${state.myUsn === m.usn ? ' selected' : ''}>${esc(m.name)} (@${esc(m.usn)})</option>`).join('')}
-    </select></div>`;
+/* ====== IDENTITAS PERANGKAT (satu device = satu pemilih) ====== */
+function deviceId() {
+    if (!state.deviceId) {
+        state.deviceId = 'dev_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        save();
+    }
+    return state.deviceId;
 }
-function renderIdentityBars() {
-    const h = identityBarHTML();
-    ['nomIdentity', 'voteIdentity'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = h; });
-}
-function setIdentity(usn) {
-    state.myUsn = usn || null; save();
-    renderIdentityBars(); renderMyNoms();
-    if (usn) toast('Halo, ' + memberName(usn) + ' ✦', 'Identitas tersimpan di perangkat ini.');
-}
+function renderIdentityBars() { /* tidak dipakai lagi — identitas kini per perangkat */ }
 
 /* ====== FORM NOMINASI ====== */
 let nomSel = { cat: null, cand: null };
 
 function renderChips() {
     const w = document.getElementById('nomChipsWrap');
-    if (!PUB.categories.length) {
+    if (!pubCats().length) {
         w.innerHTML = `<p class="chips-note">Belum ada kategori. Panitia sedang menyiapkan piala — tunggu pengumumannya.</p>`; return;
     }
-    w.innerHTML = `<div class="chips">${PUB.categories.map(c => `<button type="button" class="chip${nomSel.cat === c.id ? ' on' : ''}" data-cat="${c.id}">${ic(c.icon)}${esc(c.name)}</button>`).join('')}</div>`;
+    w.innerHTML = `<div class="chips">${pubCats().map(c => `<button type="button" class="chip${nomSel.cat === c.id ? ' on' : ''}" data-cat="${c.id}">${ic(c.icon)}${esc(c.name)}</button>`).join('')}</div>`;
     w.querySelectorAll('.chip').forEach(ch => ch.addEventListener('click', () => {
         nomSel.cat = ch.dataset.cat; nomSel.cand = null;
         renderChips(); renderCandOptions();
@@ -36,7 +25,7 @@ function renderChips() {
 }
 function renderCandOptions() {
     const sel = document.getElementById('fCand'); if (!sel) return;
-    if (!nomSel.cat || !PUB.categories.length) { sel.disabled = true; sel.innerHTML = '<option value="">— pilih kategori dulu —</option>'; return; }
+    if (!nomSel.cat || !pubCats().length) { sel.disabled = true; sel.innerHTML = '<option value="">— pilih kategori dulu —</option>'; return; }
     sel.disabled = false;
     const taken = new Set(candsIn(nomSel.cat).map(n => n.usn)); // yang sudah resmi gak bisa diusul dobel
     const opts = ROSTER.filter(m => !taken.has(m.usn));
@@ -61,7 +50,7 @@ function renderMyNoms() {
       </div>
       <h4>${esc(memberName(n.candUsn))} <span class="usn">@${esc(n.candUsn)}</span></h4>
       ${n.note ? `<p>${esc(n.note)}</p>` : ''}
-      <span class="fi-by">Diusulkan oleh <b>@${esc(n.by)}</b></span>
+      <span class="fi-by">Diusulkan dari perangkat ini</span>
       <button type="button" class="nom-del" data-del="${i}" title="Hapus catatan ini">✕</button>
     </article>`;
     }).join('')
@@ -81,7 +70,7 @@ function syncNomClosed() {
 }
 
 function initNominasi() {
-    document.getElementById('feedList').addEventListener('click', e => {   // ← baru
+    document.getElementById('feedList').addEventListener('click', e => {
         const b = e.target.closest('[data-del]'); if (!b) return;
         const i = +b.dataset.del;
         if (i >= 0 && i < state.myNoms.length) {
@@ -90,7 +79,6 @@ function initNominasi() {
             toast('Catatan dihapus', 'Cuma catatan lokal di perangkat ini — kotak panitia tidak terpengaruh.');
         }
     });
-
     renderChips(); renderCandOptions(); syncNomClosed();
     bindCatIndex();
     document.getElementById('fNote').addEventListener('input', e => e.target.closest('.field').classList.remove('bad'));
@@ -101,12 +89,10 @@ function initNominasi() {
     document.getElementById('nomForm').addEventListener('submit', e => {
         e.preventDefault();
         if (!nomOpenNow()) { toast('Meja nominasi ditutup', 'Panitia sedang tidak menerima usulan.'); return; }
-        const me = state.myUsn;
+        const me = deviceId();   // perangkat ini sebagai pengirim
         const cand = document.getElementById('fCand').value;
         const note = document.getElementById('fNote').value.trim();
         let ok = true;
-        const idbar = document.querySelector('#nomIdentity .idbar');
-        if (!me) { idbar?.classList.add('bad'); ok = false; }
         if (!nomSel.cat) { document.getElementById('fCatField').classList.add('bad'); ok = false; }
         if (!cand) { document.getElementById('fCandField').classList.add('bad'); ok = false; }
         const errEl = document.getElementById('fAgreeErr');
@@ -114,7 +100,7 @@ function initNominasi() {
         if (!ok) { toast('Formulir belum lengkap', 'Cek bagian yang bertanda merah ya.'); return; }
 
         if (state.myNoms.some(n => n.cat === nomSel.cat)) {
-            toast('Kamu sudah mengusulkan di kategori ini', 'Satu anggota satu kandidat per kategori ya.'); return;
+            toast('Perangkat ini sudah mengusulkan di kategori ini', 'Satu perangkat satu kandidat per kategori ya.'); return;
         }
 
         const nom = { cat: nomSel.cat, candUsn: cand, by: me, note, status: 'pending', ts: Date.now() };

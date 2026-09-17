@@ -303,3 +303,6 @@ const ts2input = ts => {
     if (!ts) return ''; const d = new Date(ts), p = n => String(n).padStart(2, '0');
     return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
 };
+
+/* ====== KATEGORI PUBLIK (yang bukan rahasia 🔒) — dipakai semua halaman anggota ====== */
+const pubCats = () => PUB.categories.filter(c => !(PUB.secret || {})[c.id]);
