@@ -88,18 +88,18 @@ function playPrerollIfAny() {
 
 /* ===== KREDIT PENYELENGGARA — isi foto: '' dengan URL foto, kosong = avatar inisial ===== */
 const CREDITS = {
-    owner: { name: 'Angga', foto: '' },
+    owner: { name: 'Angga', foto: './images/Angga.jpg' },
     withText: 'berserta para panitia',
     crew: [
-        { name: 'Adam',  foto: '' },
-        { name: 'Hades', foto: '' },
-        { name: 'Kala',  foto: '' },
-        { name: 'Aan',   foto: '' },
-        { name: 'Ali',   foto: '' },
-        { name: 'Prass', foto: '' },
-        { name: 'Luci',  foto: '' },
-        { name: 'Xenon', foto: '' },
-        { name: 'Amar',  foto: '' },
+        { name: 'Adam',  foto: './images/Adam.jpg' },
+        { name: 'Hades', foto: './images/Hades.jpg' },
+        { name: 'Kala',  foto: './images/Kala.jpg' },
+        { name: 'Aan',   foto: './images/Aan.jpg' },
+        { name: 'Ali',   foto: './images/Ali.jpg' },
+        { name: 'Prass', foto: './images/Prass.jpg' },
+        { name: 'Luci',  foto: './images/Luci.jpg' },
+        { name: 'Xenon', foto: './images/Xenon.jpg' },
+        { name: 'Amar',  foto: './images/Amar.jpg' },
     ]
 };
 const creditPhoto = p => p.foto || ava(p.name).replace('size=150', 'size=400');
