@@ -1560,3 +1560,75 @@
     font: italic 600 13px var(--font-d);
     color: var(--cream)
 }
+
+/* ===== EFEK DRUM ROLL SEBELUM PENGUMUMAN ===== */
+.wcard.preroll {
+    animation: shakeCard .32s ease-in-out infinite;
+    border-color: var(--gold) !important
+}
+
+.wcard.preroll .wc-sealed {
+    position: relative
+}
+
+.wcard.preroll .seal {
+    animation: sealPulse .8s ease-in-out infinite
+}
+
+@keyframes shakeCard {
+
+    0%,
+    100% {
+        transform: translate(var(--off, 0), 0) rotate(0)
+    }
+
+    25% {
+        transform: translate(calc(var(--off, 0) - 2px), 2px) rotate(-.6deg)
+    }
+
+    75% {
+        transform: translate(calc(var(--off, 0) + 2px), -2px) rotate(.6deg)
+    }
+}
+
+@keyframes sealPulse {
+
+    0%,
+    100% {
+        transform: rotate(-8deg) scale(1)
+    }
+
+    50% {
+        transform: rotate(8deg) scale(1.12);
+        box-shadow: 0 0 34px rgba(228, 87, 46, .55)
+    }
+}
+
+.wc-prerolltxt {
+    margin-top: 10px;
+    font: italic 700 clamp(1rem, 3vw, 1.4rem) var(--font-d);
+    color: var(--gold);
+    animation: txtBlink .5s steps(2) infinite
+}
+
+@keyframes txtBlink {
+    50% {
+        opacity: .25
+    }
+}
+
+body.drummode {
+    animation: pageVibe .5s ease-in-out infinite
+}
+
+@keyframes pageVibe {
+
+    0%,
+    100% {
+        transform: translate(0, 0)
+    }
+
+    50% {
+        transform: translate(0, -1.5px)
+    }
+}

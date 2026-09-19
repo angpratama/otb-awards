@@ -20,7 +20,7 @@ if (CLOUD_READY) {
 let PUB = {
     categories: [], candidates: {}, secret: {},
     nomStart: null, nomEnd: null, voteStart: null, voteEnd: null, ceremonyAt: null,
-    revealed: {}, winners: {}
+    revealed: {}, winners: {}, pre: {}
 };
 let BALLOT = {};  /* terisi cuma di perangkat admin */
 let QUEUE = {};   /* idem */
@@ -40,11 +40,9 @@ const Cloud = (() => {
 
     const fire = () => cbs.forEach(cb => { try { cb() } catch (e) { console.error(e) } });
 
-    /* PENERJEMAH: data mentah Firebase → bentuk yang dipahami halaman */
     const parsePub = v => {
         const cats = v?.categories || [];
         const raw = v?.revealed;
-        /* revealed bisa: true (versi lama, semua terbuka), object per-kategori, atau tidak ada */
         const revealed = raw === true
             ? Object.fromEntries(cats.map(c => [c.id, true]))
             : (raw || {});
@@ -53,7 +51,7 @@ const Cloud = (() => {
             nomStart: v?.nomStart || null, nomEnd: v?.nomEnd || null,
             voteStart: v?.voteStart || null, voteEnd: v?.voteEnd || null,
             ceremonyAt: v?.ceremonyAt || null,
-            revealed, winners: v?.winners || {}
+            revealed, winners: v?.winners || {}, pre: v?.pre || {}
         };
     };
 
@@ -76,10 +74,10 @@ const Cloud = (() => {
         boot(); if (!refs) return;
         refs.pub.on('value', snap => {
             const v = snap.val();
-            const stale = v && !v.categories && v.data; /* sisa data versi lama? anggap kosong */
+            const stale = v && !v.categories && v.data;
             if (!v || stale) {
                 if (firebase.auth().currentUser) {
-                    refs.pub.set({ categories: DEFAULT_CATEGORIES, candidates: {}, secret: {}, revealed: null, winners: {} })
+                    refs.pub.set({ categories: DEFAULT_CATEGORIES, candidates: {}, secret: {}, revealed: null, winners: {}, pre: {} })
                         .then(() => toast('Papan pengumuman disiapkan ✦', 'Kategori awal terpasang.'))
                         .catch(e => toast('Gagal menulis ke database', e.message));
                 }
@@ -127,14 +125,26 @@ const Cloud = (() => {
         return out;
     };
 
-    /* ---------- SEGEL: per kategori & semua ---------- */
+    /* ---------- SEGEL ---------- */
     const computeWinner = cat => {
+        const cands = Object.entries(PUB.candidates[cat] || {});
+        if (!cands.length) return null;
+        /* kandidat tunggal = menang otomatis (tanpa butuh suara) */
+        if (cands.length === 1) {
+            const [id, c] = cands[0];
+            return { id, usn: c.usn, by: c.by, note: c.note || '', votes: 0, unanimous: true };
+        }
         const t = tally(cat);
         const best = Object.entries(t).sort((a, b) => b[1] - a[1])[0];
         if (!best) return null;
         const cand = (PUB.candidates[cat] || {})[best[0]];
-        return cand ? { usn: cand.usn, by: cand.by, note: cand.note || '', votes: best[1] } : null;
+        return cand ? { id: best[0], usn: cand.usn, by: cand.by, note: cand.note || '', votes: best[1] } : null;
     };
+
+    /* DRUM ROLL: preroll → semua perangkat mainkan efek, lalu buka segel */
+    const startPre = cat => { if (refs) refs.pub.child('pre/' + cat).set(Date.now()).catch(e => toast('Gagal', e.message)); };
+    const stopPre = cat => { if (refs) refs.pub.child('pre/' + cat).remove(); };
+
     const revealCat = cat => {
         if (!refs) return;
         const w = computeWinner(cat);
@@ -165,7 +175,7 @@ const Cloud = (() => {
 
     return {
         boot, listenPub, submitNom, saveVote, adminLogin, adminLogout, listenAdmin,
-        setPub, approveNom, rejectNom, tally, revealCat, resealCat, revealAll, resealAll, resetVotes, delCandidate,
+        setPub, approveNom, rejectNom, tally, revealCat, resealCat, startPre, stopPre, revealAll, resealAll, resetVotes, delCandidate,
         onChange: cb => cbs.push(cb)
     };
 })();

@@ -1,17 +1,105 @@
-/* ===== KREDIT PENYELENGGARA — isi foto: '' dengan URL foto (imgur/postimages), kosong = avatar inisial ===== */
+/* ===== MESIN DRUM ROLL v3 — keras di speaker HP + getaran ===== */
+const DrumRoll = (() => {
+    let ctx = null, noiseBuf = null;
+    const ensure = () => {
+        if (!ctx) { try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { } }
+        if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => { });
+        return ctx;
+    };
+    /* izin audio dicoba dibuka di SETIAP sentuhan (sampai benar-benar running) */
+    const unlock = () => { const c = ensure(); if (c && c.state === 'suspended') c.resume().catch(() => { }); };
+    ['pointerdown', 'touchstart', 'keydown', 'click'].forEach(ev =>
+        document.addEventListener(ev, unlock, { passive: true }));
+
+    const getNoise = c => {
+        if (noiseBuf) return noiseBuf;
+        const len = Math.floor(c.sampleRate * .07);
+        noiseBuf = c.createBuffer(1, len, c.sampleRate);
+        const d = noiseBuf.getChannelData(0);
+        for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+        return noiseBuf;
+    };
+    function thump(t, vol, freq) {
+        const c = ctx;
+        /* 1) badan drum (nada rendah) */
+        const o = c.createOscillator(), g = c.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(freq, t);
+        o.frequency.exponentialRampToValueAtTime(Math.max(40, freq * .4), t + .18);
+        g.gain.setValueAtTime(vol, t);
+        g.gain.exponentialRampToValueAtTime(.001, t + .22);
+        o.connect(g).connect(c.destination); o.start(t); o.stop(t + .25);
+        /* 2) KLIK TINGGI — inilah yang terdengar jelas di speaker HP kecil */
+        const o2 = c.createOscillator(), g2 = c.createGain();
+        o2.type = 'square'; o2.frequency.setValueAtTime(freq * 8, t);
+        o2.frequency.exponentialRampToValueAtTime(freq * 3, t + .05);
+        g2.gain.setValueAtTime(vol * .8, t);
+        g2.gain.exponentialRampToValueAtTime(.001, t + .08);
+        o2.connect(g2).connect(c.destination); o2.start(t); o2.stop(t + .1);
+        /* 3) desis (tekstur kulit drum) */
+        const n = c.createBufferSource(); n.buffer = getNoise(c);
+        const g3 = c.createGain(); g3.gain.setValueAtTime(vol * .7, t);
+        n.connect(g3).connect(c.destination); n.start(t);
+    }
+    function roll(onStop, dur = 3800) {
+        const c = ensure();
+        /* GETARAN — Android pasti merasakan walau speaker mati */
+        try {
+            if (navigator.vibrate) {
+                const p = [];
+                for (let i = 0; i < Math.ceil(dur / 260); i++) p.push(140, 120);
+                p.push(450);
+                navigator.vibrate(p);
+            }
+        } catch (e) { }
+        if (!c) { onStop && setTimeout(onStop, dur); return; }
+        if (c.state === 'suspended') c.resume().catch(() => { });
+        const t0 = c.currentTime + .05, beats = Math.floor(dur / 190);
+        for (let i = 0; i < beats; i++) {
+            const t = t0 + i * .19, last = i >= beats - 4;
+            thump(t, i > beats - 12 ? .8 : .6, last ? 170 : 120);
+        }
+        const big = t0 + beats * .19 + .1;
+        thump(big, 1.2, 100); thump(big + .03, 1.0, 65);
+        onStop && setTimeout(onStop, dur + 320);
+    }
+    /* tes manual dari Console: DrumRoll.test() */
+    function test() {
+        const c = ensure();
+        if (!c) { console.log('❌ AudioContext gagal dibuat'); return; }
+        console.log('AudioContext state:', c.state);
+        if (c.state === 'suspended') { console.log('⚠️ MASIH SUSPENDED — klik dulu di mana pun di halaman, lalu jalankan lagi'); return; }
+        roll(null, 1500);
+        console.log('🥁 drum 1.5 detik diputar… kalau gak kedengaran: cek volume MEDIA / speaker tab');
+    }
+    return { roll, ensure, test };
+})();
+
+/* ===== PEMUTAR EFEK DRUM ROLL (sekali per status preroll) ===== */
+let prePlayed = {};
+function playPrerollIfAny() {
+    const pre = PUB.pre || {};
+    const key = Object.keys(pre)[0];
+    if (!key) return;
+    if (prePlayed[key]) return;
+    prePlayed[key] = true;
+    document.body.classList.add('drummode');
+    DrumRoll.roll(() => document.body.classList.remove('drummode'), 3800);
+}
+
+/* ===== KREDIT PENYELENGGARA — isi foto: '' dengan URL foto, kosong = avatar inisial ===== */
 const CREDITS = {
-    owner: { name: 'Angga', foto: './images/Angga.jpg' },
+    owner: { name: 'Angga', foto: '' },
     withText: 'berserta para panitia',
     crew: [
-        { name: 'Adam',  foto: './images/Adam.jpg' },
-        { name: 'Hades', foto: './images/Hades.jpg' },
-        { name: 'Kala',  foto: './images/Kala.jpg' },
-        { name: 'Aan',   foto: './images/Aan.jpg' },
-        { name: 'Ali',   foto: './images/Ali.jpg' },
-        { name: 'Prass', foto: './images/Prass.jpg' },
-        { name: 'Luci',  foto: './images/Luci.jpg' },
-        { name: 'Xenon', foto: './images/Mayong.jpg' },
-        { name: 'Amar',  foto: './images/Amar.jpg' },
+        { name: 'Adam',  foto: '' },
+        { name: 'Hades', foto: '' },
+        { name: 'Kala',  foto: '' },
+        { name: 'Aan',   foto: '' },
+        { name: 'Ali',   foto: '' },
+        { name: 'Prass', foto: '' },
+        { name: 'Luci',  foto: '' },
+        { name: 'Xenon', foto: '' },
+        { name: 'Amar',  foto: '' },
     ]
 };
 const creditPhoto = p => p.foto || ava(p.name).replace('size=150', 'size=400');
@@ -37,15 +125,20 @@ function renderCredits() {
       </div>`;
 }
 
-/* ===== PEMENANG: kartu tersegel, buka segel, sertifikat ===== */
+/* ===== PEMENANG ===== */
 function renderWinners() {
   const grid = document.getElementById('winGrid'), note = document.getElementById('winNote');
   if (!PUB.categories.length) { grid.innerHTML = ''; note.innerHTML = ''; return; }
 
-  if (!PUB.revealed || !Object.keys(PUB.revealed).length) {
-    note.innerHTML = `${ic('lock')} Semua piala masih tersegel. Hasil dihitung & diumumkan panitia di malam penganugerahan.`;
+  const pre = PUB.pre || {};
+  const preKey = Object.keys(pre)[0] || null;
+  const rev = PUB.revealed || {};
+  const revCount = Object.keys(rev).length;
+
+  if (revCount === 0 && !preKey) {
+    note.innerHTML = `${ic('lock')} Semua piala masih tersegel. Hasil diumumkan panitia di malam penganugerahan.`;
     grid.innerHTML = PUB.categories.map((c, i) => `
-      <article class="wcard${i % 2 ? ' even' : ''}">
+      <article class="wcard${i % 2 ? ' even' : ''}" data-cat="${c.id}">
         <div class="wc-top"><span>${ic(c.icon)}</span><span class="badge badge-pend">TERSEGEL</span></div>
         <h3>${esc(c.name)}</h3><p class="wc-sub">${esc(c.desc)}</p>
         <div class="wc-sealed"><div class="seal">${ic('lock')}</div><p class="wc-hint">DIUMUMKAN OLEH PANITIA — SABAR YA</p></div>
@@ -53,11 +146,28 @@ function renderWinners() {
     return;
   }
 
-  const revCount = Object.keys(PUB.revealed).length;
+  const catByIdX = id => PUB.categories.find(c => c.id === id);
+  if (preKey && catByIdX(preKey)) {
+    const c = catByIdX(preKey);
+    note.innerHTML = `${ic('eye')} SEDANG BERLANGSUNG — pengumuman untuk ${esc(c.name).toUpperCase()}! 🥁`;
+    grid.innerHTML = PUB.categories.map((x, i) => {
+      const isNow = x.id === preKey;
+      return `<article class="wcard${i % 2 ? ' even' : ''}${isNow ? ' preroll' : ''}" data-cat="${x.id}">
+        <div class="wc-top"><span>${ic(x.icon)}</span><span class="badge ${isNow ? 'badge-ok' : 'badge-pend'}">${isNow ? '🥁 LIVE' : 'TERSEGEL'}</span></div>
+        <h3>${esc(x.name)}</h3><p class="wc-sub">${esc(x.desc)}</p>
+        <div class="wc-sealed"><div class="seal">${ic('lock')}</div>
+          ${isNow ? `<p class="wc-prerolltxt">memutar roda nasib…</p>` : `<p class="wc-hint">DIUMUMKAN OLEH PANITIA — SABAR YA</p>`}
+        </div>
+      </article>`;
+    }).join('');
+    playPrerollIfAny();
+    return;
+  }
+
   note.innerHTML = `${ic('eye')} ${revCount} dari ${PUB.categories.length} piala telah dibuka panitia.${revCount < PUB.categories.length ? ' Sisanya menyusul!' : ' Selamat kepada para pemenang!'}`;
   grid.innerHTML = PUB.categories.map((c, i) => {
     if (!PUB.revealed[c.id]) {
-      return `<article class="wcard${i % 2 ? ' even' : ''}">
+      return `<article class="wcard${i % 2 ? ' even' : ''}" data-cat="${c.id}">
         <div class="wc-top"><span>${ic(c.icon)}</span><span class="badge badge-pend">TERSEGEL</span></div>
         <h3>${esc(c.name)}</h3><p class="wc-sub">${esc(c.desc)}</p>
         <div class="wc-sealed"><div class="seal">${ic('lock')}</div><p class="wc-hint">SEGERA DIUMUMKAN</p></div>
@@ -65,19 +175,19 @@ function renderWinners() {
     }
     const w = (PUB.winners || {})[c.id];
     if (!w) {
-      return `<article class="wcard${i % 2 ? ' even' : ''}">
+      return `<article class="wcard${i % 2 ? ' even' : ''}" data-cat="${c.id}">
         <div class="wc-top"><span>${ic(c.icon)}</span><span class="badge badge-off">KOSONG</span></div>
         <h3>${esc(c.name)}</h3><p class="wc-sub">${esc(c.desc)}</p>
         <div class="wc-sealed"><p class="wc-hint">TIDAK ADA PEMENANG UNTUK KATEGORI INI</p></div>
       </article>`;
     }
-    return `<article class="wcard${i % 2 ? ' even' : ''}" data-cert="${c.id}">
+    return `<article class="wcard${i % 2 ? ' even' : ''}" data-cat="${c.id}" data-cert="${c.id}">
       <div class="wc-top"><span>${ic(c.icon)}</span><span class="badge badge-ok">RESMI</span></div>
       <h3>${esc(c.name)}</h3><p class="wc-sub">${esc(c.desc)}</p>
       <div class="wc-win">
         <span class="wc-crown">${ic('crown')}</span>
         <h4>${esc(memberName(w.usn))}</h4>
-        <p>${w.votes} suara</p>
+        <p>${w.unanimous ? 'ditetapkan panitia' : w.votes + ' suara'}</p>
         <span class="wc-reopen">Buka Sertifikat →</span>
       </div>
     </article>`;
@@ -123,7 +233,7 @@ function openCert(catId) {
     <p class="cert-cat">${esc(c.name)}</p>
     <div class="trophy">${ic('trophy')}</div>
     <h3 class="cert-name">${name}</h3>
-    <p class="cert-votes">Mengumpulkan <b>${w.votes}</b> suara dari rekan-rekan yang sangat serius.</p>
+    <p class="cert-votes">Mengumpulkan <b>${w.unanimous ? 'persetujuan bulat panitia' : w.votes + ' suara'}</b> dari rekan-rekan yang sangat serius.</p>
     <div class="stamp">RESMI<br>TERSEGEL<br>VOL.01</div>
     <div class="cert-actions">
       <button type="button" class="btn btn-ink sm" data-shot>${ic('shot')} Simpan Screenshot</button>

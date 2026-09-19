@@ -32,15 +32,16 @@ function initNav() {
 }
 function initIntro() {
     const intro = document.getElementById('intro'); if (!intro) return;
-    if (sessionStorage.getItem('ba_intro')) { intro.remove(); return; } // 1x per sesi saja
+    if (sessionStorage.getItem('ba_intro')) { intro.remove(); return; }
     const finish = () => {
+        if (typeof DrumRoll !== 'undefined') DrumRoll.ensure(); // buka izin audio sejak interaksi pertama
         if (intro.classList.contains('done')) return;
         intro.classList.add('done');
         sessionStorage.setItem('ba_intro', '1');
         setTimeout(() => intro.remove(), 1000);
     };
-    intro.addEventListener('click', finish); // gak sabar? ketuk
-    setTimeout(finish, 3000);                // atau tunggu 3 detik
+    intro.addEventListener('click', finish);
+    setTimeout(finish, 3000);
 }
 function renderAll() {
     initMarquee(); renderCatIndex(); renderStats(); renderMyNoms();
