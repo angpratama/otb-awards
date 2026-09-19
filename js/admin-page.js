@@ -139,6 +139,27 @@ function renderTab() {
               <button type="button" class="btn btn-danger sm" data-act="delCand" data-cat="${c.id}" data-id="${n.id}">Hapus</button>
             </div></div>`;
         }).join('') || `<div class="feed-empty">Belum ada kandidat resmi di kategori ini.</div>`}
+
+        <div class="arow" style="align-items:flex-start">
+          <div style="flex:1;min-width:220px">
+            <b>+ Tambah Kandidat Langsung</b>
+            <p class="amuted">Tanpa lewat sidang — cocok untuk kategori 🔒 rahasia.</p>
+            <div class="two-col" style="margin-top:10px">
+              <div class="field" style="margin-bottom:6px">
+                <select id="candSel_${c.id}">
+                  <option value="">— pilih anggota —</option>
+                  ${ROSTER.filter(m => !candsIn(c.id).some(n => n.usn === m.usn)).map(m => `<option value="${esc(m.usn)}">${esc(m.name)} (@${esc(m.usn)})</option>`).join('')}
+                </select>
+              </div>
+              <div class="field" style="margin-bottom:6px">
+                <input id="candNote_${c.id}" placeholder="Catatan internal (opsional)" maxlength="220">
+              </div>
+            </div>
+            <div class="btnrow">
+              <button type="button" class="btn btn-gold sm" data-act="addCand" data-cat="${c.id}">+ Tambah</button>
+            </div>
+          </div>
+        </div>
       </div>`;
         }).join('') || `<div class="feed-empty">Belum ada kategori.</div>`;
         return;
@@ -304,6 +325,21 @@ function initAdminPage() {
             const voters = Object.entries(BALLOT[cat] || {}).filter(([, v]) => v === id).map(([u]) => u);
             Cloud.delCandidate(cat, id, voters);
             toast('Kandidat dihapus', 'Suara atas namanya juga dibersihkan.');
+        }
+        else if (act === 'addCand') {
+            const cat = el.dataset.cat;
+            const sel = document.getElementById('candSel_' + cat);
+            const noteEl = document.getElementById('candNote_' + cat);
+            const usn = sel?.value;
+            if (!usn) { toast('Pilih anggota dulu', 'Kandidat diambil dari daftar anggota di js/data.js.'); return; }
+            if (Object.values(PUB.candidates[cat] || {}).some(c => c.usn === usn)) {
+                toast('Sudah jadi kandidat', 'Anggota itu sudah terdaftar di kategori ini.'); return;
+            }
+            const cid = 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+            firebase.database().ref('boysAwards/pub/candidates/' + cat + '/' + cid)
+                .set({ usn, by: 'panitia', note: noteEl?.value.trim() || '', ts: Date.now() })
+                .then(() => toast('Kandidat ditambahkan ✦', memberName(usn) + ' langsung resmi — tanpa sidang.'))
+                .catch(e => toast('Gagal menambahkan', e.message));
         }
         else if (act === 'saveSched') {
             const g = x => { const v = document.getElementById(x)?.value; return v ? new Date(v).getTime() : null; };
